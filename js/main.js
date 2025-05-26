@@ -47,7 +47,24 @@ $(document).ready(function () {
         $(".contact-popup").addClass("hidden");
     });
 
+    // Handler for the custom newsletter checkbox
+    $('#newsletter').on('click', function() {
+        const $button = $(this);
+        // The hidden input is the next sibling in the current HTML structure.
+        const $hiddenCheckbox = $button.next('input[type="checkbox"]'); 
 
+        const isCurrentlyChecked = $button.attr('aria-checked') === 'true';
+
+        if (isCurrentlyChecked) {
+            $button.attr('aria-checked', 'false');
+            $button.attr('data-state', 'unchecked');
+            $hiddenCheckbox.prop('checked', false);
+        } else {
+            $button.attr('aria-checked', 'true');
+            $button.attr('data-state', 'checked');
+            $hiddenCheckbox.prop('checked', true);
+        }
+    });
 
     if(document.querySelector("#contact-form")){
         $('#contact-form').validate({
@@ -93,21 +110,19 @@ $(document).ready(function () {
             event.preventDefault();
 
             $("#contact-form button[type='submit']").text("Sending...");
-            $(".contact-popup h2.tracking-tight").text("Thank You!");
             $("#contact-form").addClass("hidden");
+            $(".contact-popup h2.tracking-tight").addClass("hidden");
 
             $(".contact-popup #thanks-message").removeClass("hidden");
 
-
-
             setTimeout(() => {
-                window.location.href = "thank-you.html"
-            }, 5000)
-
-
-
-
-
+                $(".contact-popup").addClass("hidden");
+                $("#contact-form").removeClass("hidden");
+                $(".contact-popup h2.tracking-tight").removeClass("hidden");
+                $(".contact-popup #thanks-message").addClass("hidden");
+                $("#contact-form button[type='submit']").text("SUBMIT");
+                form.reset();
+            }, 2000);
         }
     });
     }
@@ -144,7 +159,7 @@ $(document).ready(function () {
         submitHandler: function (form, event) {
             event.preventDefault();
 
-            $("#checkout-form button[type='submit']").text("payment...").attr("disabled","")
+            $("#checkout-form button[type='submit']").text("Payment in progress...").attr("disabled","")
 
 
             setTimeout(() => {
