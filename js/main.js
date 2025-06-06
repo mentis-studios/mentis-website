@@ -178,5 +178,54 @@ $(document).ready(function () {
 
 
 
+     if (document.querySelector("#newsletter-form")) {
+        $('#newsletter-form input').on('input', function () {
+            if ($(this).val().trim() !== '') {
+                $("#newsletter-form button[type='submit']").prop('disabled', false);
+            } else {
+                $("#newsletter-form button[type='submit']").prop('disabled', true);
+            }
+        });
+
+      
+
+
+
+
+
+        $('#newsletter-form').on('submit', function (e) {
+            e.preventDefault();
+
+            const email = $('#newsletter-form input').val().trim();
+
+            if (isValidEmail(email)) {
+                $("#newsletter-form button[type='submit']").text("Subscribing").attr("disabled", "");
+
+
+                $("#newsletter-form").addClass("hidden").next().removeClass("hidden")
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        });
+
+
+        function isValidEmail(email) {
+            if (email === '') {
+                return false;  
+            }
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return emailPattern.test(email);
+        }
+
+
+        $("#return-newsletter").on("click", function () {
+            $("#newsletter-form button[type='submit']").html("Subscribe")
+            $("#newsletter-form input").val("");
+            $("#newsletter-form").removeClass("hidden").next().addClass("hidden")
+        })
+
+    }
+
+
 
 })
