@@ -109,20 +109,77 @@ $(document).ready(function () {
         submitHandler: function (form, event) {
             event.preventDefault();
 
-            $("#contact-form button[type='submit']").text("Sending...");
-            $("#contact-form").addClass("hidden");
-            $(".contact-popup h2.tracking-tight").addClass("hidden");
+            $("#contact-form button[type='submit']").text("Sending...").prop("disabled", true);
+            // Clear previous error messages
+            $("#contact-form .form-submission-error").remove();
 
-            $(".contact-popup #thanks-message").removeClass("hidden");
+            const formData = $(form).serializeArray();
+            const jsonData = {};
+            $.each(formData, function(index, field) {
+                jsonData[field.name] = field.value;
+            });
+            // Explicitly set newsletterOptIn based on the aria-checked state of the #newsletter div
+            jsonData.newsletterOptIn = $('#newsletter').attr('aria-checked') === 'true';
 
-            setTimeout(() => {
-                $(".contact-popup").addClass("hidden");
-                $("#contact-form").removeClass("hidden");
-                $(".contact-popup h2.tracking-tight").removeClass("hidden");
-                $(".contact-popup #thanks-message").addClass("hidden");
-                $("#contact-form button[type='submit']").text("SUBMIT");
-                form.reset();
-            }, 2000);
+
+            fetch("https://faas-lon1-917a94a7.doserverless.co/api/v1/web/fn-8f75e4b9-a87a-4b3f-9da8-9a2f2da0803b/sample/mentis", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(jsonData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().catch(() => ({ // if response.json() fails, provide a generic error
+                        error: true,
+                        status: response.status,
+                        statusText: response.statusText
+                    })).then(errorData => {
+                        throw errorData; // Re-throw the (potentially more detailed) error
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Contact form success:", data);
+                $("#contact-form").addClass("hidden");
+                $(".contact-popup h2.tracking-tight").addClass("hidden");
+                $(".contact-popup #thanks-message").removeClass("hidden");
+
+                setTimeout(() => {
+                    $(".contact-popup").addClass("hidden"); // Hide the whole popup
+                    // Reset form state for next time popup opens
+                    $("#contact-form").removeClass("hidden");
+                    $(".contact-popup h2.tracking-tight").removeClass("hidden");
+                    $(".contact-popup #thanks-message").addClass("hidden");
+                    $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
+                    form.reset();
+                    // Reset custom newsletter checkbox state
+                    $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
+                    $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
+                }, 100);
+            })
+            .catch((error) => {
+                console.error("Error submitting form:", error);
+                // console.log("Success:", data);
+                $("#contact-form").addClass("hidden");
+                $(".contact-popup h2.tracking-tight").addClass("hidden");
+                $(".contact-popup #thanks-message").removeClass("hidden");
+
+                setTimeout(() => {
+                    $(".contact-popup").addClass("hidden"); // Hide the whole popup
+                    // Reset form state for next time popup opens
+                    $("#contact-form").removeClass("hidden");
+                    $(".contact-popup h2.tracking-tight").removeClass("hidden");
+                    $(".contact-popup #thanks-message").addClass("hidden");
+                    $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
+                    form.reset();
+                    // Reset custom newsletter checkbox state
+                    $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
+                    $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
+                }, 100);
+            });
         }
     });
     }
@@ -179,35 +236,68 @@ $(document).ready(function () {
 
 
      if (document.querySelector("#newsletter-form")) {
-        $('#newsletter-form input').on('input', function () {
+        const $newsletterForm = $('#newsletter-form');
+        const $newsletterFormParent = $newsletterForm.parent(); // Static parent for event delegation
+        // More robust selection of the thank you container using the button ID within it
+        const $thankYouContainer = $("#return-newsletter").closest('.bg-neutral-900.border.border-neutral-800.rounded-lg.p-6');
+        // Fallback if the above is too specific or classes change, assuming it's a div parent of the button:
+        // const $thankYouContainer = $("#return-newsletter").parent('div'); 
+
+        $newsletterForm.find('input[type="email"]').on('input', function () {
             if ($(this).val().trim() !== '') {
-                $("#newsletter-form button[type='submit']").prop('disabled', false);
+                $newsletterForm.find("button[type='submit']").prop('disabled', false);
             } else {
-                $("#newsletter-form button[type='submit']").prop('disabled', true);
+                $newsletterForm.find("button[type='submit']").prop('disabled', true);
             }
         });
 
-      
-
-
-
-
-
-        $('#newsletter-form').on('submit', function (e) {
+        $newsletterForm.on('submit', function (e) {
             e.preventDefault();
 
-            const email = $('#newsletter-form input').val().trim();
+            const email = $newsletterForm.find('input[type="email"]').val().trim();
+            const $submitButton = $newsletterForm.find("button[type='submit']");
 
             if (isValidEmail(email)) {
-                $("#newsletter-form button[type='submit']").text("Subscribing").attr("disabled", "");
+                $submitButton.text("Subscribing...").prop("disabled", true);
+                $newsletterForm.find(".newsletter-form-error").remove();
 
+                const jsonData = {
+                    email: email,
+                    newsletterSubscription: true
+                };
 
-                $("#newsletter-form").addClass("hidden").next().removeClass("hidden")
+                fetch("https://faas-lon1-917a94a7.doserverless.co/api/v1/web/fn-8f75e4b9-a87a-4b3f-9da8-9a2f2da0803b/sample/mentis", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(jsonData),
+                })
+                .then(data => {
+                    console.log("Newsletter subscription success:", data);
+                    $newsletterForm.addClass("hidden");
+                    $thankYouContainer.removeClass("hidden"); // Show the static thank you message
+                })
+                .catch(error => {
+                    console.error("Error subscribing to newsletter (UI shows success):", error);
+                    $newsletterForm.addClass("hidden");
+                    $thankYouContainer.removeClass("hidden"); // Show the static thank you message
+                });
+
             } else {
-                alert('Please enter a valid email address.');
+                $newsletterForm.find(".newsletter-form-error").remove();
+                $newsletterForm.append('<p class="text-xs text-destructive newsletter-form-error">Please enter a valid email address.</p>');
             }
         });
 
+        // Delegated click handler for the "#return-newsletter" button within the static thank you component
+        $newsletterFormParent.on("click", "#return-newsletter", function () {
+            $newsletterForm.find("button[type='submit']").html("Subscribe").prop('disabled', true);
+            $newsletterForm.find("input[type='email']").val("");
+            $newsletterForm.find(".newsletter-form-error").remove();
+            $newsletterForm.removeClass("hidden");
+            $thankYouContainer.addClass("hidden"); // Hide the static thank you message
+        });
 
         function isValidEmail(email) {
             if (email === '') {
@@ -216,13 +306,6 @@ $(document).ready(function () {
             const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
             return emailPattern.test(email);
         }
-
-
-        $("#return-newsletter").on("click", function () {
-            $("#newsletter-form button[type='submit']").html("Subscribe")
-            $("#newsletter-form input").val("");
-            $("#newsletter-form").removeClass("hidden").next().addClass("hidden")
-        })
 
     }
 
