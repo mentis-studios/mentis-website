@@ -122,7 +122,7 @@ $(document).ready(function () {
             jsonData.newsletterOptIn = $('#newsletter').attr('aria-checked') === 'true';
 
 
-            fetch("https://faas-lon1-917a94a7.doserverless.co/api/v1/web/fn-8f75e4b9-a87a-4b3f-9da8-9a2f2da0803b/sample/mentis", {
+            fetch("https://faas-lon1-917a94a7.doserverless.co/api/v1/web/fn-ad311164-ea9f-47e4-85f2-15023a0fbc8e/sample/mentis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
