@@ -186,51 +186,79 @@ $(document).ready(function () {
 
     
 
-    if(document.querySelector("#checkout-form")) {
-        $('#checkout-form').validate({
-
-
+   if (document.querySelector("#checkout-form")) {
+    $('#checkout-form').validate({
         errorElement: "p",
         errorClass: "text-sm font-medium text-destructive",
         rules: {
             firstName: { required: true, minlength: 2, maxlength: 35 },
             lastName: { required: true, minlength: 2, maxlength: 35 },
             email: { required: true, email: true, minlength: 8, maxlength: 40 },
-
-
-
-
         },
         messages: {
             firstName: { required: "First Name must be at least 2 characters" },
             lastName: { required: "Last Name must be at least 2 characters" },
             email: { required: "Please enter a valid email address" },
-
-
         },
-
         errorPlacement: function (error, element) {
             element.after(error);
-
         },
-        submitHandler: function (form, event) {
+        submitHandler: async function (form, event) {
             event.preventDefault();
+            const urlParams = new URLSearchParams(window.location.search);
+    const amountInUSD = urlParams.get('price');
 
-            $("#checkout-form button[type='submit']").text("Payment in progress...").attr("disabled","")
+            // Get form data
+            const formData = {
+                firstName: $("#checkout-form [name='firstName']").val(),
+                lastName: $("#checkout-form [name='lastName']").val(),
+                email: $("#checkout-form [name='email']").val(),
+                amountInUSD: amountInUSD
+             
+            };
 
+            // Update button state
+            $("#checkout-form button[type='submit']")
+                .text("Processing payment...")
+                .attr("disabled", "");
 
-            setTimeout(() => {
-                window.location.href = `thank-you.html`;
-            }, 1500)
+            const paymentEndpoint = `https://payments.avatarpromotion.com/payment-link`;
 
+            try {
+                const response = await fetch(paymentEndpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                });
 
+                const result = await response.json();
 
-
-
-
+                if (response.ok && result.paymentLink) {
+                    // Redirect to payment link
+                    window.open(result.paymentLink, '_self');
+                } else {
+                    // Show error if no link
+                    $("#checkout-error")
+                        .text("Payment processing failed. Please try again.")
+                        .removeClass("hidden");
+                    $("#checkout-form button[type='submit']")
+                        .text("Proceed to Payment")
+                        .removeAttr("disabled");
+                }
+            } catch (error) {
+                console.error("Payment request failed:", error);
+                $("#checkout-error")
+                    .text("Payment processing failed. Please try again.")
+                    .removeClass("hidden");
+                $("#checkout-form button[type='submit']")
+                    .text("Proceed to Payment")
+                    .removeAttr("disabled");
+            }
         }
     });
-    }
+}
 
 
 
