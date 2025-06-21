@@ -222,7 +222,7 @@ $(document).ready(function () {
                 .text("Processing payment...")
                 .attr("disabled", "");
 
-            const paymentEndpoint = `https://payments.avatarpromotion.com/payment-link`;
+            const paymentEndpoint = `https://payments.mentis-studios.com/payment-link`;
 
             try {
                 const response = await fetch(paymentEndpoint, {
