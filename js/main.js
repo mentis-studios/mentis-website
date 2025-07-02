@@ -107,80 +107,81 @@ $(document).ready(function () {
 
         },
         submitHandler: function (form, event) {
-            event.preventDefault();
+    event.preventDefault();
 
-            $("#contact-form button[type='submit']").text("Sending...").prop("disabled", true);
-            // Clear previous error messages
-            $("#contact-form .form-submission-error").remove();
+    $("#contact-form button[type='submit']").text("Sending...").prop("disabled", true);
+    // Clear previous error messages
+    $("#contact-form .form-submission-error").remove();
 
-            const formData = $(form).serializeArray();
-            const jsonData = {};
-            $.each(formData, function(index, field) {
-                jsonData[field.name] = field.value;
-            });
-            // Explicitly set newsletterOptIn based on the aria-checked state of the #newsletter div
-            jsonData.newsletterOptIn = $('#newsletter').attr('aria-checked') === 'true';
+    const formData = $(form).serializeArray();
+    const jsonData = {};
+    $.each(formData, function(index, field) {
+        jsonData[field.name] = field.value;
+    });
 
+    // Explicitly set newsletterOptIn based on the aria-checked state of the #newsletter div
+    jsonData.newsletterOptIn = $('#newsletter').attr('aria-checked') === 'true';
 
-            fetch("https://payments.mentis-studios.com/api/email", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(jsonData),
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().catch(() => ({ // if response.json() fails, provide a generic error
-                        error: true,
-                        status: response.status,
-                        statusText: response.statusText
-                    })).then(errorData => {
-                        throw errorData; // Re-throw the (potentially more detailed) error
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Contact form success:", data);
-                $("#contact-form").addClass("hidden");
-                $(".contact-popup h2.tracking-tight").addClass("hidden");
-                $(".contact-popup #thanks-message").removeClass("hidden");
-
-                setTimeout(() => {
-                    $(".contact-popup").addClass("hidden"); // Hide the whole popup
-                    // Reset form state for next time popup opens
-                    $("#contact-form").removeClass("hidden");
-                    $(".contact-popup h2.tracking-tight").removeClass("hidden");
-                    $(".contact-popup #thanks-message").addClass("hidden");
-                    $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
-                    form.reset();
-                    // Reset custom newsletter checkbox state
-                    $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
-                    $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
-                }, 100);
-            })
-            .catch((error) => {
-                console.error("Error submitting form:", error);
-                // console.log("Success:", data);
-                $("#contact-form").addClass("hidden");
-                $(".contact-popup h2.tracking-tight").addClass("hidden");
-                $(".contact-popup #thanks-message").removeClass("hidden");
-
-                setTimeout(() => {
-                    $(".contact-popup").addClass("hidden"); // Hide the whole popup
-                    // Reset form state for next time popup opens
-                    $("#contact-form").removeClass("hidden");
-                    $(".contact-popup h2.tracking-tight").removeClass("hidden");
-                    $(".contact-popup #thanks-message").addClass("hidden");
-                    $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
-                    form.reset();
-                    // Reset custom newsletter checkbox state
-                    $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
-                    $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
-                }, 100);
+    fetch("https://payments.mentis-studios.com/api/email", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jsonData),
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().catch(() => ({
+                error: true,
+                status: response.status,
+                statusText: response.statusText
+            })).then(errorData => {
+                throw errorData;
             });
         }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Contact form success:", data);
+
+        $("#contact-form button[type='submit']").text("Sending...");
+        $("#contact-form").addClass("hidden");
+        $(".contact-popup h2.tracking-tight").addClass("hidden");
+        $(".contact-popup #thanks-message").removeClass("hidden");
+
+        setTimeout(() => {
+            $(".contact-popup").addClass("hidden");
+            $("#contact-form").removeClass("hidden");
+            $(".contact-popup h2.tracking-tight").removeClass("hidden");
+            $(".contact-popup #thanks-message").addClass("hidden");
+            $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
+            form.reset();
+            $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
+            $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
+        }, 2000);
+    })
+    .catch((error) => {
+        console.error("Error submitting form:", error);
+
+        // Optional: You could display an error message to the user here if needed
+        $("#contact-form button[type='submit']").text("Sending...");
+        $("#contact-form").addClass("hidden");
+        $(".contact-popup h2.tracking-tight").addClass("hidden");
+        $(".contact-popup #thanks-message").removeClass("hidden");
+
+        setTimeout(() => {
+            $(".contact-popup").addClass("hidden");
+            $("#contact-form").removeClass("hidden");
+            $(".contact-popup h2.tracking-tight").removeClass("hidden");
+            $(".contact-popup #thanks-message").addClass("hidden");
+            $("#contact-form button[type='submit']").text("SUBMIT").prop("disabled", false);
+            form.reset();
+            $('#newsletter').attr('aria-checked', 'false').attr('data-state', 'unchecked');
+            $('#newsletter').next('input[type="checkbox"]').prop('checked', false);
+        }, 2000);
+    });
+}
+
     });
     }
 
@@ -294,7 +295,7 @@ $(document).ready(function () {
                     newsletterSubscription: true
                 };
 
-                fetch("https://faas-lon1-917a94a7.doserverless.co/api/v1/web/fn-8f75e4b9-a87a-4b3f-9da8-9a2f2da0803b/sample/mentis", {
+                fetch("https://payments.mentis-studios.com/api/email", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
