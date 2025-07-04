@@ -13,7 +13,7 @@ function generateRecaptchaToken() {
 
         grecaptcha.ready(function() {
             try {
-                grecaptcha.execute('6Led4j8rAAAAAIrypqp80FcU6q1GAtpcsrIrZcDH', {action: 'submit'})
+                grecaptcha.execute('6LftOXYrAAAAAJJrWSMSd8vfvgm-n8euRTpGA_qq', {action: 'submit'})
                     .then(function(token) {
                         if (!token) {
                             reject(new Error('Failed to generate reCAPTCHA token'));
