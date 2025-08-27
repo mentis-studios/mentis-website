@@ -101,14 +101,14 @@
                                         class="text-white font-medium" id="plan-name">Professional</span></div>
                                 <div class="flex justify-between pb-4 border-b border-neutral-800"><span
                                         class="text-neutral-400">Price</span><span
-                                        class="text-white font-medium" id="plan-price">$99.99/month</span></div>
+                                        class="text-white font-medium" id="plan-price">$99.99</span></div>
                                 <div class="flex justify-between pb-4 border-b border-neutral-800"><span
                                         class="text-neutral-400">Billing</span><span
-                                        class="text-white font-medium">Monthly</span></div>
+                                        class="text-white font-medium">One Time</span></div>
                             </div>
                             <div class="mt-6 pt-4 border-t border-neutral-800">
                                 <div class="flex justify-between text-lg font-bold"><span
-                                        class="text-white">Total</span><span class="text-primary" id="total-price">$99.99/month</span>
+                                        class="text-white">Total</span><span class="text-primary" id="total-price">$99.99</span>
                                 </div>
                             </div>
                             <div class="mt-6 text-sm text-neutral-500">
@@ -145,8 +145,8 @@
                 $('#plan-name').text(planName);
             }
             if (planPrice) {
-                $('#plan-price').text('$' + planPrice + '/month');
-                $('#total-price').text('$' + planPrice + '/month');
+                $('#plan-price').text('$' + planPrice + '');
+                $('#total-price').text('$' + planPrice + '');
             }
         });
     </script>
